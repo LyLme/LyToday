@@ -60,7 +60,7 @@ class Today
             $file = $filedir . $cache['latest'];
             if (file_exists($file)) {
                 $cachedata = json_decode(file_get_contents($file), true)['data'];
-                array_unshift($cachedata, '<b>今天的60秒简讯还未更新，下面是' . explode('.', $cache['latest'])[0] . '的简讯！</b>');
+                array_unshift($cachedata, '今天的60秒简讯还未更新，下面是' . $this->fdate(explode('.', $cache['latest'])[0]) . '的简讯！');
                 return $cachedata;
             } else {
                 return ['获取数据失败！'];
@@ -128,7 +128,35 @@ class Today
         curl_close($curl);
         return $response;
     }
-
+     /**
+     * 格式化日期
+     * @param string $time 日期yyyymmdd格式
+     * @return string 格式化后的日期
+     */
+    
+    private function fdate($time) {
+        preg_match('/([0-9]{4})([0-9]{2})([0-9]{2})/', $time,$ha);
+        $t=$ha[1].'-'.$ha[2].'-'.$ha[3];
+        $strtotime= strtotime($t);
+        if (!$strtotime) {
+            return $time;
+        }
+        $d = time() - intval($time);
+        $byd = time() - mktime(0, 0, 0, date('m'), date('d') - 2, date('Y')); //前天
+        $yd = time() - mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')); //昨天
+        switch ($d) {
+            case $d == $yd:
+                $fdate = '昨天';
+                break;
+            case $d == $byd:
+                $fdate = '前天';
+                break;
+            default:
+                $fdate = date('Y-m-d', $time);
+                break;
+        }
+        return $fdate;
+    }
     public function returnJson($data, $time = 0)
     {
         if (empty($data)) {
@@ -153,8 +181,7 @@ class Today
         return json_encode($arr, 320);
     }
     /**
-     * Undocumented function
-     *
+     * 更新缓存
      * @param string $filename 文件名
      * @param integer $time 更新时间
      * @return void
