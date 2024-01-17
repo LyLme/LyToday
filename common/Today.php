@@ -20,7 +20,7 @@ class Today
         $filedir = SYSTEM_ROOT . 'data/60s_view/'; //数据目录
         $filename = $filedir . date('Ymd') . '.json'; //今日缓存文件
         $cachefile = $filedir . "cache.json";
-        if(!file_exists($cachefile)){
+        if (!file_exists($cachefile)) {
             $this->updateCache('');
         }
         $cache = json_decode(file_get_contents($cachefile), true); //缓存信息
@@ -29,7 +29,6 @@ class Today
             $json = file_get_contents($filename);
             $data = json_decode($json, true);
             return $data['data'];
-
         } elseif ($cache['updatetime'] + 3600 <= time() || empty($cache['latest'])) {
             //缓存过期（有效期1h）
 
@@ -46,7 +45,6 @@ class Today
                 } else {
                     return false;
                 }
-
             } else {
                 //获取成功
                 $jsondata = $data['time'] . '.json';
@@ -54,7 +52,6 @@ class Today
                 file_put_contents($filedir . $jsondata, $response);
                 return $data['data'];
             }
-
         } else {
             //从缓存中读取
             $file = $filedir . $cache['latest'];
@@ -65,9 +62,7 @@ class Today
             } else {
                 return false;
             }
-
         }
-
     }
     public function getHistoryToday($month, $day)
     {
@@ -105,6 +100,52 @@ class Today
         }
         return $array;
     }
+    /**
+     * 实时热搜
+     */
+    public function hot()
+    {
+
+        $filedir = SYSTEM_ROOT . 'data/hot/'; //数据目录
+        $filename = $filedir . 'data.json'; //最新缓存文件
+        $cachefile = $filedir . "cache.json";
+        if (!file_exists($cachefile)) {
+            $this->updateHot();
+        }
+        $cache = json_decode(file_get_contents($cachefile), true); //缓存信息
+        if (file_exists($filename) && $cache['updatetime'] + 3600 > time()) {
+            //缓存文件存在，未过期
+            $json = file_get_contents($filename);
+            $data = json_decode($json, true);
+            return $data['data'];
+        } elseif ($cache['updatetime'] + 3600 <= time() || !file_exists($filename)) {
+            //缓存文件不存在或过期（有效期1h）
+
+            $response = $this->getCurl('https://cdn.lylme.com/api/hot/'); //实时热搜接口
+            $data = json_decode($response, true);
+            if (empty($data['code']) || $data['code'] != 200) {
+                //获取失败（使用缓存）
+                clearstatcache();
+                if (is_file($filename)) {
+                    $latest = json_decode(file_get_contents($filename), true);
+                    $hot_data = $latest['data'];
+                    $hot_updatetime = "热搜数据更新于" . $filename['time'];
+                    array_unshift($hot_data, array("code" => 0, "data" => array("title" => $hot_updatetime, "url" => "#")));
+                    return $hot_data;
+                } else {
+                    return false;
+                }
+            } else {
+                //获取成功，更新缓存
+                $this->updateHot(); //更新缓存
+                file_put_contents($filename, $response);
+                return $data['data'];
+            }
+        } else {
+            //失败
+            return false;
+        }
+    }
     public function getCurl($url)
     {
         $curl = curl_init();
@@ -117,11 +158,11 @@ class Today
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
                 CURLOPT_TIMEOUT => 0,
-                CURLOPT_SSL_VERIFYPEER=> false,
-                CURLOPT_SSL_VERIFYHOST=> false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'GET',
-                CURLOPT_USERAGENT=> 'LyToday_curl'
+                CURLOPT_USERAGENT => 'LyToday_curl'
             )
         );
         $response = curl_exec($curl);
@@ -129,20 +170,22 @@ class Today
         return $response;
     }
     /**
-    * 格式化日期
-    * @param string $time 日期yyyymmdd格式
-    * @return string 格式化后的日期
-    */
+     * 格式化日期
+     * @param string $time 日期yyyymmdd格式
+     * @return string 格式化后的日期
+     */
 
     private function fdate($time)
     {
         preg_match('/([0-9]{4})([0-9]{2})([0-9]{2})/', $time, $ha);
-        $t = $ha[1] . '-' . $ha[2] . '-' . $ha[3];
-        $strtotime = strtotime($t);
-        if (!$strtotime) {
+        if (!empty($ha)) {
+            $t = $ha[1] . '-' . $ha[2] . '-' . $ha[3];
+            $strtotime = strtotime($t);
+        }
+        if (!isset($strtotime) || !$strtotime) {
             return $time;
         }
-        $d = time() - intval($time);
+        $d = time() - $strtotime;
         $byd = time() - mktime(0, 0, 0, date('m'), date('d') - 2, date('Y')); //前天
         $yd = time() - mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')); //昨天
         switch ($d) {
@@ -194,6 +237,16 @@ class Today
         $cachearr = array(
             "updatetime" => time(),
             "latest" => $filename
+        );
+        file_put_contents($cachefile, json_encode($cachearr), 320);
+    }
+
+    public function updateHot()
+    {
+        $filepath = SYSTEM_ROOT . 'data/hot/';
+        $cachefile = $filepath . "cache.json";
+        $cachearr = array(
+            "updatetime" => time()
         );
         file_put_contents($cachefile, json_encode($cachearr), 320);
     }

@@ -8,6 +8,8 @@
  * @Description: 公共文件
  */
 error_reporting(0);
+ini_set('date.timezone','Asia/Shanghai');
+
 define('SYSTEM_ROOT', dirname(__FILE__) . '/');
 define('ROOT', dirname(SYSTEM_ROOT) . '/');
 require ROOT . 'config.php';
@@ -21,6 +23,9 @@ if ($config['lunar']) {
 }
 if ($config['day60s']) {
     $day60s = $Today->get60sView();
+}
+if ($config['hot']) {
+    $hots = $Today->hot();
 }
 if ($config['history']) {
     $history_today = $Today->getHistoryToday(date('m'), date('d'));
@@ -37,3 +42,16 @@ function yan()
         return "一万年太久，只争朝夕！";
     }
 }
+function formatNumber($number) {  
+    if(!is_numeric($number)){
+        return $number;
+    }
+    if ($number >= 10000) {  
+        $number = round($number / 10000);
+        return $number . 'w';  
+    } elseif ($number >= 1000) {  
+        $number = round($number / 1000);
+        return $number . 'k';  
+    }  
+    return $number;
+}  

@@ -1,5 +1,4 @@
-
-  <?php
+<?php
 /*
  * @Author: LyLme admin@lylme.com
  * @Date: 2023-04-25 11:09:06
@@ -9,7 +8,7 @@
  * @Description: default模板@MurphyChen
  */
 include $config['theme'] . '/head.php';
-  ?>
+?>
 
 <body>
   <div id="root">
@@ -19,15 +18,14 @@ include $config['theme'] . '/head.php';
           <header font="song bold" text="center white" pb-2="">
             <div flex="" items-center="" mb-5="">
               <div flex-1=""></div>
-              <button class="roo-color " px-3="" py-3="" data-html2canvas-ignore id="saveimg"
-                onclick="saveimg(true)">保存图片</button>
+              <button class="roo-color " px-3="" py-3="" data-html2canvas-ignore id="saveimg" onclick="saveimg(true)">保存图片</button>
             </div>
             <!-- <p font-normal="" text-lg="" pt-1="">120秒视界</p> -->
 
             <p text-3xl="" tracking-wider="" pt-2="" mt-2="">
               <?php echo date('Y') ?>
             </p>
-           <h2 text-5xl="" py-3="">
+            <h2 text-5xl="" py-3="">
               <?php echo date('n月j日') ?>
             </h2>
             <div pt-2="" text-lg="" tracking-wider="">
@@ -48,30 +46,70 @@ include $config['theme'] . '/head.php';
                 <h1 class="root-color" font="song bold"><i>「60秒读懂世界」</i></h1>
                 <ul text-sm="">
                   <?php
-                    if(!empty($day60s)) {
-                        foreach ($day60s as $item) {
-                            preg_match('/^\d+、(.+)；/', $item, $search);
-                            echo '<li class="mt-1 leading-6"><a href="https://www.wuzhuiso.com/s?q=' . $search[1] . '" target="_blank">' . $item . '</a></li>';
-                        }
-                    } else {
-                        echo '<li class="mt-1 leading-6">获取数据失败</li>';
+                  if (!empty($day60s)) {
+                    foreach ($day60s as $item) {
+                      preg_match('/^\d+、(.+)；/', $item, $search);
+                      if (array_key_exists(1, $search)) {
+                        echo '<li class="mt-1 leading-6"><a href="https://www.wuzhuiso.com/s?q=' . urlencode($search[1]) . '" target="_blank">' . $item . '</a></li>';
+                      } else {
+                        echo '<li class="mt-1 leading-6">' . $item . '</li>';
+                      }
                     }
-                ?>
+                  } else {
+                    echo '<li class="mt-1 leading-6">获取数据失败</li>';
+                  }
+                  ?>
                 </ul>
               </div>
             <?php } ?>
+            <?php if ($config['hot']) { ?>
+
+              <!-- 实时热搜 -->
+              <div my-3="">
+                <h1 class="root-color h1-float" font="song bold">
+                  <span class="left-text"><i>「实时热搜」</i></span>
+                  <span class="right-text"><a href="./hot" target="_blank">查看完整热搜榜>></a></span>
+                </h1>
+
+                <ul text-sm="">
+                  <?php
+                  if (!empty($hots)) {
+                    foreach ($hots as $item) {
+                      echo '<li class="mt-1 leading-6"><b>[' . $item["name"] . ']</b></li>';
+                      $slices = array_slice($item['data'], 0, 10); //显示前5条
+                      $i = 1;
+                      echo '<table class="table" text-sm="" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody>';
+                      foreach ($slices as $slice) {
+                        echo ' <tr>
+                        <td class="h1" align="center">' . $i . '.</td>
+                        <td class="h2"><a href="' . $slice['url'] . '" target="_blank" rel="nofollow">' . $slice['title'] . '</a></td>
+                        <td class="h3" align="right">' . formatNumber($slice['hotScore']) . '</td>
+                        </tr>';
+                        //  echo '<li class="mt-1 leading-6"><a href="' . $slice['url'] . '" target="_blank">' . $i . '、' . $slice['title'] . '</a><font color="#F1403C">' . formatNumber($slice['hotScore']) . '</font></li>';
+                        $i++;
+                      }
+                      echo '</tbody></table>';
+                    }
+                  } else {
+                    echo '<li class="mt-1 leading-6">获取数据失败</li>';
+                  }
+                  ?>
+                </ul>
+              </div>
+            <?php } ?>
+
             <?php if ($config['history']) { ?>
               <!-- 历史上的今天 -->
               <div my-3="">
                 <h1 class="root-color" font="song bold"><i>「历史上的今天」</i></h1>
                 <ul text-sm="">
                   <?php
-                foreach ($history_today as $item) {
+                  foreach ($history_today as $item) {
                     echo ' <li class="leading-6"><a href="' . $item['link'] . '"
                 target="_blank" title="' . $item['desc'] . '"><span inline-block="" w-8="" text-right="" font-sans=""><i>' . $item['year'] . '</i></span><span
                   mx-1="">·</span><span>' . $item['title'] . '</span></a></li>';
-                }
-                ?>
+                  }
+                  ?>
                 </ul>
               </div>
             <?php } ?>
@@ -156,6 +194,7 @@ include $config['theme'] . '/head.php';
   var img = document.getElementById('saveimg');
   var modalImg = document.getElementById("imgview");
   var span = document.getElementsByClassName("close")[0];
+
   function saveimg(wx = false) {
 
     html2canvas(document.getElementById('lylme'), {
@@ -178,7 +217,7 @@ include $config['theme'] . '/head.php';
     });
   }
 
-  span.onclick = function () {
+  span.onclick = function() {
 
     modal.style.display = "none";
     imgview.src = '';
