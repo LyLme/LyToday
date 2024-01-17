@@ -8,4 +8,4 @@
  * @Description: LyToday入口文件
  */
 require 'common/common.php';
-?>
+require $config['theme'] . '/index.php';

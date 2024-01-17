@@ -29,12 +29,11 @@ if ($config['history']) {
 function yan()
 {
     $filename = SYSTEM_ROOT . 'data/yan/yan.txt';
-    if (file_exists($filename)) {
-        $data = explode(PHP_EOL, file_get_contents($filename));
+    if (file_exists($filename) && is_readable($filename)) {
+        $data = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $day = intval((count($data) + date('z')) % count($data));
         return str_replace(array("\r", "\n", "\r\n"), '', $data[$day]);
     } else {
         return "一万年太久，只争朝夕！";
     }
 }
-include($config['theme'] . '/index.php');
