@@ -7,9 +7,9 @@
  * @FilePath: conmmon/Today.php
  * @Description: LyToday核心操作类
  */
+
 namespace lylme\today;
 
-define('SYSTEM_ROOT', dirname(__FILE__) . '/');
 class Today
 {
     /**
@@ -30,12 +30,12 @@ class Today
             $data = json_decode($json, true);
             return $data['data'];
 
-        } else if ($cache['updatetime'] + 3600 <= time() || empty($cache['latest'])) {
+        } elseif ($cache['updatetime'] + 3600 <= time() || empty($cache['latest'])) {
             //缓存过期（有效期1h）
 
             $response = $this->getCurl('https://cdn.lylme.com/api/60s/'); //60秒简报接口
             $data = json_decode($response, true);
-            if ($data['status'] != 200) {
+            if (empty($data['status']) || $data['status'] != 200) {
                 //获取失败（使用缓存）
                 $file = $filedir . $cache['latest'];
                 clearstatcache();
@@ -44,7 +44,7 @@ class Today
                     $latest_data = array_push($latest, '拉取最新数据失败！');
                     return $latest_data;
                 } else {
-                    return ['获取数据失败！'];
+                    return false;
                 }
 
             } else {
@@ -60,10 +60,10 @@ class Today
             $file = $filedir . $cache['latest'];
             if (file_exists($file)) {
                 $cachedata = json_decode(file_get_contents($file), true)['data'];
-                array_unshift($cachedata, '今天的60秒简讯还未更新，下面是' . $this->fdate(explode('.', $cache['latest'])[0]) . '的简讯！');
+                array_unshift($cachedata, '今天的简讯未更新，下面是' . $this->fdate(explode('.', $cache['latest'])[0]) . '的简讯！');
                 return $cachedata;
             } else {
-                return ['获取数据失败！'];
+                return false;
             }
 
         }
@@ -113,31 +113,32 @@ class Today
             array(
                 CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
                 CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER=> false,
+                CURLOPT_SSL_VERIFYHOST=> false,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'GET',
-                CURLOPT_HTTPHEADER => array(
-                    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
-                ),
+                CURLOPT_USERAGENT=> 'LyToday_curl'
             )
         );
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
     }
-     /**
-     * 格式化日期
-     * @param string $time 日期yyyymmdd格式
-     * @return string 格式化后的日期
-     */
-    
-    private function fdate($time) {
-        preg_match('/([0-9]{4})([0-9]{2})([0-9]{2})/', $time,$ha);
-        $t=$ha[1].'-'.$ha[2].'-'.$ha[3];
-        $strtotime= strtotime($t);
+    /**
+    * 格式化日期
+    * @param string $time 日期yyyymmdd格式
+    * @return string 格式化后的日期
+    */
+
+    private function fdate($time)
+    {
+        preg_match('/([0-9]{4})([0-9]{2})([0-9]{2})/', $time, $ha);
+        $t = $ha[1] . '-' . $ha[2] . '-' . $ha[3];
+        $strtotime = strtotime($t);
         if (!$strtotime) {
             return $time;
         }
