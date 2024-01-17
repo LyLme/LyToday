@@ -8,9 +8,9 @@
  * @Description: 历史上的今天api接口
  */
 header("Content-type:application/json");
-require '../../common/Today.php';
+require '../../common/common.php';
 use lylme\today\Today;
 
-$Today = new Today;
+$Today = new Today();
 $data = $Today->returnJson($Today->getHistoryToday(date('m'), date('d')));
 exit($data);
