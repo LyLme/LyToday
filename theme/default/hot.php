@@ -75,7 +75,7 @@
                       <td class="hot h3" align="right">' . formatNumber($slice['hotScore']) . '</td>
                     </tr>
                     ';
-                    if(!empty($slice['desc'])){
+                    if(!empty($slice['desc'])&& $config['hotconf']['desc']){
                       echo ' <tr  class="hot-desc"><td></td><td class="hot h3" colspan="2"><a href="' . $slice['url'] . '" target="_blank" rel="nofollow">' . subtext($slice['desc'],300). '</a></td></tr>
                       ';
                     }
