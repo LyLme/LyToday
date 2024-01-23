@@ -4,13 +4,12 @@
  * @Author: LyLme admin@lylme.com
  * @Date: Tue Jan 23 2024 12:16:33
  * @LastEditors: LyLme admin@lylme.com
- * @LastEditTime: 2024-01-23 19:25:00
+ * @LastEditTime: 2024-01-23 20:35:08
  * @FilePath: /LyToday/common/common.php
  * @Copyright (c) 2024 by LyLme, All Rights Reserved. 
  */
 
-
-//error_reporting(0);
+error_reporting(0);
 ini_set('date.timezone', 'Asia/Shanghai');
 
 define('SYSTEM_ROOT', dirname(__FILE__) . '/');
