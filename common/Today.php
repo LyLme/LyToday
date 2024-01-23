@@ -1,17 +1,24 @@
 <?php
-/*
+/* 
+ * @Description: LyToday核心文件
  * @Author: LyLme admin@lylme.com
- * @Date: 2023-04-24 20:30:24
+ * @Date: 2024-01-23 12:16:33
  * @LastEditors: LyLme admin@lylme.com
- * @LastEditTime: 2023-04-26 01:43:11
- * @FilePath: conmmon/Today.php
- * @Description: LyToday核心操作类
+ * @LastEditTime: 2024-01-23 19:28:04
+ * @FilePath: /LyToday/common/Today.php
+ * @Copyright (c) 2024 by LyLme, All Rights Reserved. 
  */
+
 
 namespace lylme\today;
 
 class Today
 {
+    public $config;
+    function __construct($config)
+    {
+        $this->config = $config;
+    }
     /**
      * 每天60秒读懂世界
      */
@@ -101,11 +108,15 @@ class Today
         return $array;
     }
     /**
-     * 实时热搜
+     * 获取热搜
+     * @Author: LyLme
      */
     public function hot()
     {
-
+        $updatef = intval($this->config['hotconf']['updatef']) ?: 3600;
+        if ($updatef < 300) {
+            $updatef = 300;
+        }
         $filedir = SYSTEM_ROOT . 'data/hot/'; //数据目录
         $filename = $filedir . 'data.json'; //最新缓存文件
         $cachefile = $filedir . "cache.json";
@@ -113,13 +124,13 @@ class Today
             $this->updateHot();
         }
         $cache = json_decode(file_get_contents($cachefile), true); //缓存信息
-        if (file_exists($filename) && $cache['updatetime'] + 3600 > time()) {
+        if (file_exists($filename) && $cache['updatetime'] + $updatef > time()) {
             //缓存文件存在，未过期
             $json = file_get_contents($filename);
             $data = json_decode($json, true);
             return $data['data'];
-        } elseif ($cache['updatetime'] + 3600 <= time() || !file_exists($filename)) {
-            //缓存文件不存在或过期（有效期1h）
+        } elseif ($cache['updatetime'] + $updatef <= time() || !file_exists($filename)) {
+            //缓存文件不存在或过期
 
             $response = $this->getCurl('https://cdn.lylme.com/api/hot/'); //实时热搜接口
             $data = json_decode($response, true);
@@ -145,6 +156,28 @@ class Today
             //失败
             return false;
         }
+    }
+    /**
+     * 解析热搜
+     * @param string $type
+     * @return array
+     */
+    public function parseHot($hots, $type = null, $hot_title = "热搜榜")
+    {
+        if ($type == null) {
+            return array($hots, $hot_title);
+        }
+        $hot_data = [];
+        foreach ($hots as $hot) {
+            if ($hot['alias'] == $type) {
+                $hot_data[] = $hot;
+                $hot_title = $hot['name'];
+            }
+        }
+        if (empty($hot_data)) {
+            $hot_data = $hots;
+        }
+        return array($hot_data, $hot_title);
     }
     public function getCurl($url)
     {

@@ -1,11 +1,12 @@
 <?php
-/*
- * @Author: LyLme admin@lylme.com
- * @Date: 2023-04-25 11:09:06
- * @LastEditors: LyLme admin@lylme.com
- * @LastEditTime: 2023-04-25 22:23:57
- * @FilePath: theme/default/index.php
+/* 
  * @Description: default模板@MurphyChen
+ * @Author: LyLme admin@lylme.com
+ * @Date: 2024-01-23 12:16:33
+ * @LastEditors: LyLme admin@lylme.com
+ * @LastEditTime: 2024-01-23 20:08:21
+ * @FilePath: /LyToday/theme/default/index.php
+ * @Copyright (c) 2024 by LyLme, All Rights Reserved. 
  */
 include $config['theme'] . '/head.php';
 ?>
@@ -66,35 +67,39 @@ include $config['theme'] . '/head.php';
 
               <!-- 实时热搜 -->
               <div my-3="">
-                <h1 class="root-color h1-float" font="song bold">
-                  <span class="left-text"><i>「实时热搜」</i></span>
-                  <span class="right-text"><a href="./hot" target="_blank">查看完整热搜榜>></a></span>
-                </h1>
-
-                <ul text-sm="">
+     
+              <h1 class="root-color h1-float" mt-2="" font="song bold">
+                      <span class="left-text"><i>「实时热搜」</i></span>
+                      <span class="right-text"><a href="./hot/" target="_blank">完整榜单&gt;</a></span>
+                    </h1>
                   <?php
                   if (!empty($hots)) {
                     foreach ($hots as $item) {
-                      echo '<li class="mt-1 leading-6"><b>[' . $item["name"] . ']</b></li>';
-                      $slices = array_slice($item['data'], 0, 10); //显示前5条
+                      echo '
+                      <h2 class="root-color h1-float" mt-2="" font="song bold">
+                      <span class="left-text hot-list">「' . $item["name"] . '」</span>
+                      <span class="right-text"><a href="./hot?type=' . $item["alias"] . '" target="_blank">更多></a></span>
+                    </h2>';
+                      $slices = array_slice($item['data'], 0, 10); //显示前10条
                       $i = 1;
                       echo '<table class="table" text-sm="" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody>';
                       foreach ($slices as $slice) {
-                        echo ' <tr>
-                        <td class="h1" align="center">' . $i . '.</td>
-                        <td class="h2"><a href="' . $slice['url'] . '" target="_blank" rel="nofollow">' . $slice['title'] . '</a></td>
-                        <td class="h3" align="right">' . formatNumber($slice['hotScore']) . '</td>
+                        echo '
+                        <tr>
+                        <td class="hot h1" align="center">' . $i . '.</td>
+                        <td class="hot h2"><a href="' . $slice['url'] . '" target="_blank" rel="nofollow">' . $slice['title'] . '</a></td>
+                        <td class="hot h3" align="right">' . formatNumber($slice['hotScore']) . '</td>
                         </tr>';
-                        //  echo '<li class="mt-1 leading-6"><a href="' . $slice['url'] . '" target="_blank">' . $i . '、' . $slice['title'] . '</a><font color="#F1403C">' . formatNumber($slice['hotScore']) . '</font></li>';
                         $i++;
                       }
-                      echo '</tbody></table>';
+
+                      echo '
+                      </tbody></table>';
                     }
                   } else {
                     echo '<li class="mt-1 leading-6">获取数据失败</li>';
                   }
                   ?>
-                </ul>
               </div>
             <?php } ?>
 

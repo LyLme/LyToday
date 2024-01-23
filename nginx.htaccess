@@ -1,0 +1,1 @@
+rewrite ^/hot/(\w+)\.html$ /hot/?type=$1 last;  

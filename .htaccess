@@ -1,0 +1,3 @@
+RewriteEngine On
+#RewriteBase /
+RewriteRule ^hot/(\w+)\.html$ /hot/?type=$1 [L]
